@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Word Pad</title>
+  <style>
+    /* CSS styles */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 300px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    
+    .toolbar {
+      margin-bottom: 10px;
+    }
+    
+    .toolbar button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="formatText('bold')">Bold</button>
+    <button onclick="formatText('italic')">Italic</button>
+    <button onclick="formatText('underline')">Underline</button>
+    <button onclick="formatText('strikethrough')">Strike Through</button>
+    <button onclick="alignText('left')">Align Left</button>
+    <button onclick="alignText('center')">Align Center</button>
+    <button onclick="alignText('right')">Align Right</button>
+    <select onchange="changeFontSize(this.value)">
+      <option value="12">12px</option>
+      <option value="16">16px</option>
+      <option value="20">20px</option>
+      <option value="24">24px</option>
+    </select>
+    <select onchange="changeFontFamily(this.value)">
+      <option value="Arial">Arial</option>
+      <option value="Verdana">Verdana</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Courier New">Courier New</option>
+    </select>
+    <input type="color" onchange="changeFontColor(this.value)">
+    <input type="color" onchange="changeBackgroundColor(this.value)">
+    <button onclick="downloadText()">Download</button>
+  </div>
+  
+  <textarea id="editor"></textarea>
+
+  <script src="https://cdn.jsdelivr.net/npm/vim.js@1.0.0/vim.min.js"></script>
+  <script>
+    const editor = document.getElementById('editor');
+    
+    function formatText(style) {
+      const selectedText = getSelectedText();
+      if (selectedText) {
+        let newText = '';
+        switch (style) {
+          case 'bold':
+            newText = `<b>${selectedText}</b>`;
+            break;
+          case 'italic':
+            newText = `<i>${selectedText}</i>`;
+            break;
+          case 'underline':
+            newText = `<u>${selectedText}</u>`;
+            break;
+          case 'strikethrough':
+            newText = `<s>${selectedText}</s>`;
+            break;
+        }
+        replaceSelectedText(newText);
+      }
+    }
+    
+    function alignText(align) {
+      editor.style.textAlign = align;
+    }
+    
+    function changeFontSize(fontSize) {
+      editor.style.fontSize = fontSize + 'px';
+    }
+    
+    function changeFontFamily(fontFamily) {
+      editor.style.fontFamily = fontFamily;
+    }
+    
+    function changeFontColor(color) {
+      editor.style.color = color;
+    }
+    
+    function changeBackgroundColor(color) {
+      editor.style.backgroundColor = color;
+    }
+    
+    function getSelectedText() {
+      if (typeof window.getSelection != 'undefined') {
+        return window.getSelection().toString();
+      } else if (typeof document.selection != 'undefined' && document.selection.type == 'Text') {
+        return document.selection.createRange().text;
+      }
+      return '';
+    }
+    
+    function replaceSelectedText(newText) {
+      const selectedText = getSelectedText();
+      const textBefore = editor.value.substring(0, editor.selectionStart);
+      const textAfter = editor.value.substring(editor.selectionEnd, editor.value.length);
+      editor.value = textBefore + newText + textAfter;
+    }
+    
+    function downloadText() {
+      const filename = 'word_pad.txt';
+      const text = editor.value;
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+  </script>
+</body>
+</html>
