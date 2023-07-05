@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Colorful Image Resizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        
+        .resizer {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .resizer h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .dropzone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .dropzone p {
+            margin: 0;
+            color: #777;
+        }
+        
+        .dropzone.highlight {
+            background-color: #f7f7f7;
+        }
+        
+        .resizer button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .resizer button:hover {
+            opacity: 0.8;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone/dist/dropzone.css">
+</head>
+<body>
+    <div class="resizer">
+        <h1>Image Resizer</h1>
+        <div class="dropzone" id="imageDropzone">
+            <p>Drag and drop an image file here or click to upload.</p>
+        </div>
+        <button onclick="resizeImage()">Resize Image</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/dropzone"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        var myDropzone = new Dropzone("#imageDropzone", {
+            acceptedFiles: "image/*",
+            maxFiles: 1,
+            maxFilesize: 2,
+            addRemoveLinks: true,
+            dictRemoveFile: "Remove",
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
+            init: function() {
+                this.on("success", function(file, response) {
+                    var img = new Image();
+                    img.src = response.resizedUrl;
+                    img.onload = function() {
+                        var resizedImage = document.createElement('a');
+                        resizedImage.href = response.resizedUrl;
+                        resizedImage.setAttribute('download', file.name);
+                        resizedImage.appendChild(img);
+                        document.body.appendChild(resizedImage);
+                    };
+                });
+            }
+        });
+
+        function resizeImage() {
+            if (myDropzone.files.length === 1) {
+                var file = myDropzone.files[0];
+                var formData = new FormData();
+                formData.append("image", file);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/resize", true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        myDropzone.removeAllFiles();
+                        alert("Image resized successfully!");
+                    }
+                };
+                xhr.send(formData);
+            } else {
+                alert("Please upload an image file first!");
+            }
+        }
+    </script>
+</body>
+</html>
